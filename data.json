@@ -1,6 +1,6 @@
 {
     "trino": {
-        "base_users": ["root", "bob"],
+        "base_users": ["root", "trino"],
         "base_operations": [
         "ExecuteQuery",
         "AccessCatalog",

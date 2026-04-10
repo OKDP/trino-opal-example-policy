@@ -2,46 +2,36 @@ package trino
 
 default allow := false
 
-# Base users allowed core operations
-allow {
-    user := input.context.identity.user
-    groups := input.context.identity.groups
-    operation := input.action.operation
+user := input.context.identity.user
+groups := input.context.identity.groups
+operation := input.action.operation
+resource := input.action.resource
 
-    data.trino.base_users[_] == user
+# Base users allowed core operations
+allow if {
+    user in data.trino.base_users
     groups == []
-    data.trino.base_operations[_] == operation
+    operation in data.trino.base_operations
 }
 
-# Catalog-level access
-allow {
-    user := input.context.identity.user
-    operation := input.action.operation
-    resource := input.action.resource
 
+# Catalog-level access
+allow if {
     catalog := data.trino.catalog_permissions[user][_]
     operation == "AccessCatalog"
     resource.catalog.name == catalog
 }
 
 # Schema-level access
-allow {
-    user := input.context.identity.user
-    operation := input.action.operation
-    resource := input.action.resource
-
+allow if {
     catalog := data.trino.schema_permissions[user][_]
     operation == "ShowTables"
     resource.schema.catalogName == catalog
 }
 
 # Table-level access
-allow {
-    user := input.context.identity.user
-    operation := input.action.operation
-    resource := input.action.resource
-
+allow if {
     catalog := data.trino.table_permissions[user][_]
-    data.trino.table_operations[_] == operation
+    operation in data.trino.table_operations
     resource.table.catalogName == catalog
 }
